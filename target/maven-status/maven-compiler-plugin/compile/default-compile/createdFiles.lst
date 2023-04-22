@@ -1,0 +1,13 @@
+com/mycompany/react_chat_app_backend/InviteAccepted.class
+com/mycompany/react_chat_app_backend/DeleteChatGroup.class
+com/mycompany/react_chat_app_backend/util/MessageData.class
+com/mycompany/react_chat_app_backend/util/ChatGroups.class
+com/mycompany/react_chat_app_backend/util/Secrets.class
+com/mycompany/react_chat_app_backend/PostMessageServlet.class
+com/mycompany/react_chat_app_backend/GetFriendsList.class
+com/mycompany/react_chat_app_backend/CreateGroupChat.class
+com/mycompany/react_chat_app_backend/GetLatestMessages.class
+com/mycompany/react_chat_app_backend/InviteRequest.class
+com/mycompany/react_chat_app_backend/util/Email.class
+com/mycompany/react_chat_app_backend/GetUsersSavedChatGroups.class
+com/mycompany/react_chat_app_backend/RemoveFromChatGroup.class
