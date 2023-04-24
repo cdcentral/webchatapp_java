@@ -3,6 +3,10 @@
     <servlet>
         <servlet-name>InviteRequest</servlet-name>
         <servlet-class>com.mycompany.react_chat_app_backend.InviteRequest</servlet-class>
+        <init-param>
+            <param-name>fromEmail</param-name>
+            <param-value>some.users.email@email.com</param-value>
+        </init-param>
     </servlet>
     <servlet>
         <servlet-name>InviteAccepted</servlet-name>
