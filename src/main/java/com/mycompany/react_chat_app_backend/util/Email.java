@@ -77,11 +77,18 @@ public class Email {
 
     private Properties props;
  
+    private String awsRegion;
+    private String awsSecret;
+    
     /**
      * 
      * @param emailToInvite 
+     * @param emailFrom 
+     * @param smtpEndpoint 
+     * @param awsRegion 
+     * @param awsSecret 
      */
-    public Email(String emailToInvite) {
+    public Email(String emailToInvite, String emailFrom, String smtpEndpoint, String awsRegion, String awsSecret) {
 
             // Create a Properties object to contain connection configuration information.
             props = System.getProperties();
@@ -92,7 +99,10 @@ public class Email {
             props.put("mail.debug", "true");
 
             TO = emailToInvite;
-
+            FROM = emailFrom;
+            HOST = smtpEndpoint;
+            this.awsRegion = awsRegion;
+            this.awsSecret = awsSecret;
     }
 
     /**
@@ -104,7 +114,7 @@ public class Email {
     public boolean sendEmail(Integer requestId) {
         boolean retStatus = false;
         BODY = "Invite link sent http://localhost:3000/InviteAccepted/?rid=" + requestId;
-        String smtpCreds = Secrets.getSecret();
+        String smtpCreds = Secrets.getSecret(awsRegion, awsSecret);
         JSONObject jsonSmtpCreds = new JSONObject(smtpCreds);
         SMTP_USERNAME = jsonSmtpCreds.getString("smtpUsername");
         SMTP_PASSWORD = jsonSmtpCreds.getString("smtpPassword");

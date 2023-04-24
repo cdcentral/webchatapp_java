@@ -1,8 +1,22 @@
 # Ignore this file.
-# This will contain hardcoded data needed to connect to external services
 src/main/java/com/mycompany/react_chat_app_backend/hardcoded
 
 
-target
-target/
-target/*
+.classpath
+.project
+.settings/
+#target/
+
+*/target/*
+target/test-classes/.netbeans_automatic_build
+
+#src/main/webapp/WEB-INF/web_with_real_data.xml
+
+src/**/web_with_real_data.xml
+
+#doc/**/*.pdf
+
+#/target
+#target
+#target/
+#target/*

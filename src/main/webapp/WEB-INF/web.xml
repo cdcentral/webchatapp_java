@@ -7,6 +7,19 @@
             <param-name>fromEmail</param-name>
             <param-value>some.users.email@email.com</param-value>
         </init-param>
+        <init-param>
+            <param-name>smtpEndpoint</param-name>
+            <param-value>your.smtp.end.point</param-value>
+        </init-param>
+        <init-param>
+            <param-name>awsRegion</param-name>
+            <param-value>your.aws.region</param-value>
+        </init-param>
+        <init-param>
+            <!-- Name of the secret from the AWS Secrets Manager you're trying to extract.-->
+            <param-name>awsSecretName</param-name>
+            <param-value>your.aws.secrets.manager.secret.name</param-value>
+        </init-param>
     </servlet>
     <servlet>
         <servlet-name>InviteAccepted</servlet-name>

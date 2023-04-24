@@ -23,14 +23,19 @@ import java.util.Base64;
  * @author chris
  */
 public class Secrets {
-    // Use this code snippet in your app.
-    // If you need more information about configurations or implementing the sample code, visit the AWS docs:
-    // https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-samples.html#prerequisites
 
-    public static String getSecret() {
+    /**
+     * Use this code snippet in your app.
+     * If you need more information about configurations or implementing the sample code, visit the AWS docs:
+     * https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/java-dg-samples.html#prerequisites
+     * @param awsRegion
+     * @param awsSecret
+     * @return 
+     */
+    public static String getSecret(String awsRegion, String awsSecret) {
 
-        String secretName = "<your variable name for smtp credentials in AWS Secrets Manager>";
-        String region = "<your aws region where your AWS Secrets Manager is located>";
+        String region = awsRegion;
+        String secretName = awsSecret;
 
         // Create a Secrets Manager client
         AWSSecretsManager client  = AWSSecretsManagerClientBuilder.standard()
