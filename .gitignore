@@ -1,0 +1,8 @@
+# Ignore this file.
+# This will contain hardcoded data needed to connect to external services
+src/main/java/com/mycompany/react_chat_app_backend/hardcoded
+
+
+target
+target/
+target/*
