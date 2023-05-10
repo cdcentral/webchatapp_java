@@ -34,7 +34,7 @@ public class PostMessageServlet extends HttpServlet {
     /**
      * Class logger.
      */
-    private static final Logger LOGGER = Logger.getLogger(PostMessageServlet.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PostMessageServlet.class.getSimpleName());
 
     /**
      * These variables below will contain the values sent from the react front end.
@@ -78,7 +78,7 @@ public class PostMessageServlet extends HttpServlet {
         }
 
         try ( PrintWriter out = response.getWriter()) {
-            LOGGER.info("[PostMessageServlet] ");
+            LOGGER.log(Level.INFO, "Message to be sent back: {0}", jsonResponse.toString());
             out.println(jsonResponse.toString());
         }
     }
