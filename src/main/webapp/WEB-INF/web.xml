@@ -1,8 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app version="3.1" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+    <!-- Environment variables/entries -->
+    <env-entry>
+        <!-- (String)ctxt.lookup("java:/comp/env/appEnvironment"); -->
+        <env-entry-name>appEnvironment</env-entry-name>
+        <env-entry-type>java.lang.String</env-entry-type>
+        <env-entry-value>test</env-entry-value>
+    </env-entry>
     <servlet>
         <servlet-name>InviteRequest</servlet-name>
         <servlet-class>com.mycompany.react_chat_app_backend.InviteRequest</servlet-class>
+        <init-param>
+            <param-name>fromEmail</param-name>
+            <param-value>your.email</param-value>
+        </init-param>
+        <init-param>
+            <param-name>smtpEndpoint</param-name>
+            <param-value>your.smtp.endpoint</param-value>
+        </init-param>
+        <init-param>
+            <param-name>awsRegion</param-name>
+            <param-value>your.aws.region</param-value>
+        </init-param>
+        <init-param>
+            <!-- Name of the secret from the AWS Secrets Manager you're trying to extract.-->
+            <param-name>awsSecretName</param-name>
+            <param-value>your.aws.secret</param-value>
+        </init-param>
     </servlet>
     <servlet>
         <servlet-name>InviteAccepted</servlet-name>

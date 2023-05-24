@@ -1,0 +1,24 @@
+# Ignore this file.
+src/main/java/com/mycompany/react_chat_app_backend/hardcoded
+
+
+.classpath
+.project
+.settings/
+target
+target/
+#target/
+
+*/target/*
+target/test-classes/.netbeans_automatic_build
+
+#src/main/webapp/WEB-INF/web_with_real_data.xml
+
+src/**/web_with_real_data.xml
+
+#doc/**/*.pdf
+
+#/target
+#target
+#target/
+#target/*
