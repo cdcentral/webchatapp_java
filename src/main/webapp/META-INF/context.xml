@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Context path="/react_chat_app_backend">
-  <Resource auth="container" driverClassName="your db driver" maxIdle="10" maxTotal="20" maxWaitMillis="-1" name="your db name" password="your password to connect to your database endpoint" type="javax.sql.DataSource" url="your database endpoint" username="your username to connect to the database endpoint"/>
+  <Resource auth="Container" driverClassName="org.postgresql.Driver" maxIdle="10" maxTotal="20" maxWaitMillis="-1" name="jdbc/postgres" password="2023_Password" type="javax.sql.DataSource" url="jdbc:postgresql://localhost:5432/chat_app" username="postgres"/>
 </Context>
+

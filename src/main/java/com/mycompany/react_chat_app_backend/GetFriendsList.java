@@ -4,6 +4,7 @@
  */
 package com.mycompany.react_chat_app_backend;
 
+import com.mycompany.react_chat_app_backend.util.Friend;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -32,6 +33,8 @@ import org.json.JSONObject;
  */
 public class GetFriendsList extends HttpServlet {
 
+    private String userKeycloakId = "";
+    private String sourceOfRequest = "";
     /**
      * Class logger.
      */
@@ -48,13 +51,22 @@ public class GetFriendsList extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        
-        String userKeycloakId = getUserKeycloakId(request);
-
-        ArrayList<String> friends = getFriendsList(userKeycloakId);
+        userKeycloakId = "";
+        sourceOfRequest= "";
+        getRequestData(request);
         JSONObject jsonResponse = new JSONObject();
-        jsonResponse.put("friends", friends);
 
+        if (sourceOfRequest == null || sourceOfRequest.isEmpty()) {
+            // request came from ChatPage component
+            ArrayList<String> friends = getFriendsList(userKeycloakId);
+            jsonResponse.put("friends", friends);
+
+        } else {
+            // request from Settings component.
+            // get friend data plus some unique id (to put in react component unique key list)
+            ArrayList<Friend> friends = getFriendsWithExtraDataList(userKeycloakId);
+            jsonResponse.put("friends", friends);
+        }
         try ( PrintWriter out = response.getWriter()) {
 
             out.println(jsonResponse.toString());
@@ -103,6 +115,87 @@ public class GetFriendsList extends HttpServlet {
         }
         return friendsList;
     }
+
+    /**
+     * Gets list of friends associated to the requestor (defined by the userId).
+     * 
+     * The returned data will contain the friend plus their unique requestId.
+     * 
+     * @param userId String.
+     * @return 
+     */
+    private ArrayList<Friend> getFriendsWithExtraDataList (String userId) {
+        ArrayList<Friend> friendsList = new ArrayList<Friend>();
+        Connection conn = null;
+        try {
+            InitialContext ctxt = new InitialContext();
+
+            DataSource ds = (DataSource)ctxt.lookup("java:/comp/env/jdbc/postgres");
+            conn = ds.getConnection();
+
+            // First check if the user request already exists.  THIS is to prevent duplicate entries into the table.
+            PreparedStatement friendsStatement = conn.prepareStatement("select * from invite where accepted = true and requestor = ?");
+            friendsStatement.setString(1, userId);
+
+            ResultSet rows = friendsStatement.executeQuery();
+            while (rows.next()) {
+                Friend friend = new Friend(rows.getString("requestee"), rows.getInt("requestid"));
+
+                friendsList.add(friend);
+                //LOGGER.log(Level.INFO, "[getFriendsWithExtraDataList] friend found: {0}", requestee);
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        } finally {
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException ex) {
+                    LOGGER.log(Level.SEVERE, null, ex);
+                }
+                conn = null;
+            }
+        }
+        return friendsList;
+    }
+    /**
+     * Get 'from' and 'userKeycloakId' fields from http request.
+     * This will help determine what data to return.
+     * 
+     * @param request
+     * @return 
+     */
+    private void getRequestData(HttpServletRequest request) {
+        String from = "";
+        try (BufferedReader reader = request.getReader()) {
+
+            String line = "";
+            String msg = "";
+            while ((line = reader.readLine()) != null) {
+                msg += line + "\n";
+                if (line.contains("from")) {
+                    // read ahead
+                    line = reader.readLine();
+                    msg += line + "\n";
+                    line = reader.readLine();
+                    msg += line + "\n";
+                    sourceOfRequest = line.trim();
+                }
+                if (line.contains("userKeycloakId")) {
+                    // read ahead
+                    line = reader.readLine();
+                    msg += line + "\n";
+                    line = reader.readLine();
+                    msg += line + "\n";
+                    userKeycloakId = line.trim();
+                }
+            }
+            LOGGER.log(Level.INFO, "msg: {0}", msg);
+        } catch (IOException ex) {
+            LOGGER.log(Level.SEVERE, null, ex);
+        }
+
+    }
     /**
      * Extracts requestId field from the http post request.
      * @param request
@@ -111,7 +204,7 @@ public class GetFriendsList extends HttpServlet {
     private String getUserKeycloakId(HttpServletRequest request) {
         String userKeycloakId = "";
         try (BufferedReader reader = request.getReader()) {
-            
+
             String line = "";
             String msg = "";
             while ((line = reader.readLine()) != null) {
