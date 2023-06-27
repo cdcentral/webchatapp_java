@@ -161,8 +161,12 @@ public class InviteRequest extends HttpServlet {
             }
         }
 
+        String smtpEndpoint = getServletConfig().getInitParameter("smtpEndpoint");
+        String emailFrom = getServletConfig().getInitParameter("fromEmail");
+        String awsRegion = getServletConfig().getInitParameter("awsRegion");
+        String awsSecret = getServletConfig().getInitParameter("awsSecretName");
         // SEND EMAIL.
-        Email email = new Email(emailToInvite);
+        Email email = new Email(emailToInvite, emailFrom, smtpEndpoint, awsRegion, awsSecret);
         boolean retStatus = email.sendEmail(requestId);
         jsonResponse.put("emailSentStatus", retStatus);
 
