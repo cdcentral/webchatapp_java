@@ -133,8 +133,9 @@ public class GetFriendsList extends HttpServlet {
             DataSource ds = (DataSource)ctxt.lookup("java:/comp/env/jdbc/postgres");
             conn = ds.getConnection();
 
+            String query = "select * from invite where accepted = true and requestor = ?";
             // First check if the user request already exists.  THIS is to prevent duplicate entries into the table.
-            PreparedStatement friendsStatement = conn.prepareStatement("select * from invite where accepted = true and requestor = ?");
+            PreparedStatement friendsStatement = conn.prepareStatement(query);
             friendsStatement.setString(1, userId);
 
             ResultSet rows = friendsStatement.executeQuery();

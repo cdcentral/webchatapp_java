@@ -12,8 +12,8 @@ package com.mycompany.react_chat_app_backend.util;
  * @author chris
  */
 public class Friend {
-    private String friend;
-    private Integer friendRequestId;
+    protected String friend;
+    protected Integer friendRequestId;
 
     public Friend() {
         

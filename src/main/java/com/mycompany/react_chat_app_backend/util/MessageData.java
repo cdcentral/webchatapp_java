@@ -20,14 +20,16 @@ public class MessageData {
     private Timestamp msg_timestamp;
     private String user_id;
     private String user_name;
+    private String user_email;
     private String chat_group;
 
-    public MessageData(String msg_id, String message, Timestamp msg_timestamp, String user_id, String user_name, String chat_group) {
+    public MessageData(String msg_id, String message, Timestamp msg_timestamp, String user_id, String user_name, String user_email, String chat_group) {
         this.msg_id = msg_id;
         this.message = message;
         this.msg_timestamp = msg_timestamp;
         this.user_id = user_id;
         this.user_name = user_name;
+        this.user_email = user_email;
         this.chat_group = chat_group;
     }
 
@@ -113,5 +115,19 @@ public class MessageData {
      */
     public void setChat_group(String chat_group) {
         this.chat_group = chat_group;
+    }
+
+    /**
+     * @return the user_email
+     */
+    public String getUser_email() {
+        return user_email;
+    }
+
+    /**
+     * @param user_email the user_email to set
+     */
+    public void setUser_email(String user_email) {
+        this.user_email = user_email;
     }
 }

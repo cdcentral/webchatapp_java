@@ -42,6 +42,7 @@ public class PostMessageServlet extends HttpServlet {
     private String userMessage = "";
     private String keycloakUserId = "";
     private String keycloakUsername = "";
+    private String keycloakUserEmail = "";
     private String chatGroupMembers = "";
     private Integer chatGroupID = -1;
 
@@ -52,6 +53,7 @@ public class PostMessageServlet extends HttpServlet {
     private final String USER_MESSAGE = "userMessageToPost";
     private final String KEYCLOAK_USER_ID = "keycloakUserId";
     private final String KEYCLOAK_USERNAME = "keycloakUserName";
+    private final String KEYCLOAK_USER_EMAIL = "keycloakUserEmail";
     private final String CHAT_GROUP_MEMBERS = "chatGroupMembers";
     private final String CHAT_GROUP_ID = "chatGroupID";
 
@@ -101,18 +103,19 @@ public class PostMessageServlet extends HttpServlet {
             /*message_id, chat_group, user_id_that_posted_msg, user_name_that_posted_msg, message */
             PreparedStatement pstmt = 
                     conn.prepareStatement(
-                            "INSERT INTO group_messages (chat_group, chat_group_id, user_id_that_posted_msg, user_name_that_posted_msg, message, message_timestamp) VALUES (?,?,?,?,?,?);"
+                            "INSERT INTO group_messages (chat_group, chat_group_id, user_id_that_posted_msg, user_name_that_posted_msg, user_email_that_posted_msg, message, message_timestamp) VALUES (?,?,?,?,?,?,?);"
                     );
             pstmt.setString(1, chatGroupMembers);
             pstmt.setInt(2, chatGroupID);
             pstmt.setString(3, keycloakUserId);
             pstmt.setString(4, keycloakUsername);
-            pstmt.setString(5, userMessage);
+            pstmt.setString(5, keycloakUserEmail);
+            pstmt.setString(6, userMessage);
             Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-            pstmt.setTimestamp(6, timestamp);
+            pstmt.setTimestamp(7, timestamp);
             rowsEffected = pstmt.executeUpdate();
             status = (rowsEffected > 0);
-        } catch (SQLException | NamingException ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Exception while posting message: {0}", ex);
         } finally {
             if (conn != null) {
@@ -126,6 +129,7 @@ public class PostMessageServlet extends HttpServlet {
         }
         return status;
     }
+
     /**
      * Extract posted data from react app.
      * @param request HttpServletRequest
@@ -164,6 +168,13 @@ public class PostMessageServlet extends HttpServlet {
                     line = reader.readLine();
                     msg += line + "\n";
                     keycloakUsername = line.trim();
+                } else if (line.contains(KEYCLOAK_USER_EMAIL)) {
+                    // read ahead
+                    line = reader.readLine();
+                    msg += line + "\n";
+                    line = reader.readLine();
+                    msg += line + "\n";
+                    keycloakUserEmail = line.trim();
                 } else if (line.contains(CHAT_GROUP_MEMBERS)) {
                     // read ahead
                     line = reader.readLine();
@@ -181,7 +192,7 @@ public class PostMessageServlet extends HttpServlet {
                 }
             }
             LOGGER.log(Level.INFO, "Message received: {0}", msg);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
         dataExtracted = (!userMessage.isEmpty() && !chatGroupMembers.isEmpty() && chatGroupID != -1 
