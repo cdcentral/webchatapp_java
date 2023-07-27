@@ -9,9 +9,11 @@ package com.mycompany.react_chat_app_backend.util;
  * 
  * Used in the GetFriendsList.java
  * 
+ * THIS MAY BE OBE as the GetFrieldsList.java servlet may no longer be called by the GUI.
  * @author chris
  */
 public class Friend {
+
     protected String friend;
     protected Integer friendRequestId;
 

@@ -63,12 +63,14 @@
     <servlet>
         <servlet-name>SaveImage</servlet-name>
         <servlet-class>com.mycompany.react_chat_app_backend.SaveImage</servlet-class>
+        <!--
         <multipart-config>
             <location>/tmp</location>
             <max-file-size>         418018841</max-file-size>
             <max-request-size>      418018841</max-request-size>
             <file-size-threshold>   418018841</file-size-threshold>
         </multipart-config>
+        -->
     </servlet>
     <servlet>
         <servlet-name>GetFriendsAvatars</servlet-name>

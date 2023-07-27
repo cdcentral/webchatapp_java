@@ -11,8 +11,6 @@ import java.io.ByteArrayInputStream;
 import java.io.PrintWriter;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,7 +23,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.Part;
 import javax.sql.DataSource;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -44,10 +41,24 @@ public class SaveImage extends HttpServlet {
      */
     private static final Logger LOGGER = Logger.getLogger(SaveImage.class.getName());
 
+    /**
+     * The user making the avatar selection for their friend.
+     */
     private String keycloakID = "";
+
+    /**
+     * Friend who is about the have their image saved by the user keycloak id.
+     */
     private String friend = "";
 
+    /**
+     * String representation of the image to be saved.
+     */
     private String img = "";
+
+    /**
+     * Byte array representation of the image to be saved.
+     */
     private byte[] imgByteArray;
 
     /**
@@ -91,33 +102,39 @@ public class SaveImage extends HttpServlet {
         }
 
         if (!img.isEmpty()) {
+            displayImageInJFrame(false);
+        }
+    }
+    /**
+     * Helper test method to verify the image can be displayed in a jframe.
+     */
+    private void displayImageInJFrame(boolean show) {
+        if (!show) {
+            return;
+        }
+        String base64Image = img.split(",")[1];
+        imgByteArray = DatatypeConverter.parseBase64Binary(base64Image);
+        byte[]imageBytes = DatatypeConverter.parseBase64Binary(base64Image);
 
-            String base64Image = img.split(",")[1];
-            imgByteArray = DatatypeConverter.parseBase64Binary(base64Image);
-            byte[]imageBytes = DatatypeConverter.parseBase64Binary(base64Image);
-            //byte[]imageBytes = javax.xml.bind.DatatypeConverter.parseBase64Binary(base64Image); //ava.lang.ClassNotFoundException: javax.xml.bind.DatatypeConverter
+        /*
+        Works below.  I can display the image received from React App.
+        */
+        try {
+               final BufferedImage bufImg = ImageIO.read(new ByteArrayInputStream(imageBytes));
 
-
-            /*
-            Works below.  I can display the image received from React App.
-            try {
-                   final BufferedImage bufImg = ImageIO.read(new ByteArrayInputStream(imageBytes));
-
-                JFrame frame = new JFrame("Image");
-                  //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                  frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-                  //frame.setSize(img.getWidth(), img.getHeight());
-                  frame.setSize(200, 200);
-                  frame.add(new JPanel() {
-                    public void paint(Graphics g) {
-                      g.drawImage(bufImg, 0, 0, null);
-                    }
-                  });
-                  frame.show();
-            } catch (IOException ex) {
-                Logger.getLogger(SaveImage.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            */
+            JFrame frame = new JFrame("Image");
+              //frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+              frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+              //frame.setSize(img.getWidth(), img.getHeight());
+              frame.setSize(200, 200);
+              frame.add(new JPanel() {
+                public void paint(Graphics g) {
+                  g.drawImage(bufImg, 0, 0, null);
+                }
+              });
+              frame.show();
+        } catch (IOException ex) {
+            Logger.getLogger(SaveImage.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     /**
@@ -141,10 +158,10 @@ public class SaveImage extends HttpServlet {
                 boolean exists = doesDataExist();
                 if (!exists) {
                     // check if image/data already exists
-                    saveImageToDatabase(null, jsonResponse);                    
+                    saveImageToDatabase(jsonResponse);
                 } else {
                     // update
-                    updateImageToDatabase(null, jsonResponse);
+                    updateImageToDatabase(jsonResponse);
                 }
             } else {
                     jsonResponse.put("RowsEffected", -1000);
@@ -153,84 +170,18 @@ public class SaveImage extends HttpServlet {
             }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Exception -> ", ex);
-            //e.printStackTrace();
+
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error saving image");
         }
 
-
-//        InputStream inputStream = null;
-//        try {
-//
-//            Part keycloakPart = request.getPart("userKeycloakId");
-//            keycloakID = extractDataFromPart(keycloakPart);
-//
-//            Part friendPart = request.getPart("friend");
-//            friend = extractDataFromPart(friendPart);
-//
-//            // for this to work, needed to add <multipart-config> tags into web.xml
-//            Part filePart = request.getPart("image");
-//
-//            if (filePart != null && !keycloakID.isEmpty() && !friend.isEmpty()) {
-//                displayImageTest(filePart);
-//                inputStream = filePart.getInputStream();
-//
-//                boolean exists = doesDataExist();
-//                if (!exists) {
-//                    // check if image/data already exists
-//                    saveImageToDatabase(inputStream, jsonResponse);                    
-//                } else {
-//                    // update
-//                    updateImageToDatabase(inputStream, jsonResponse);
-//                }
-//            } else {
-//                jsonResponse.put("RowsEffected", -1000);
-//                jsonResponse.put("Success", "fail");
-//                jsonResponse.put("Reason", "Could not extract image/keycloak id/friend data");
-//            }
-//        } catch (Exception e) {
-//            LOGGER.log(Level.SEVERE, "Exception -> ", e);
-//            //e.printStackTrace();
-//            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Error saving image");
-//        } finally {
-//            if (inputStream != null) {
-//                inputStream.close();
-//            }
-//        }
         try ( PrintWriter out = response.getWriter()) {
             out.println(jsonResponse.toString());
         }
     }
 
-    private void displayImageTest(Part part) {
-        try {
-            InputStream is = part.getInputStream();
-            byte[] barr = is.readAllBytes();
-            BufferedImage bimg = byteArrayToImage(barr);
-            LOGGER.info("bimg null? " + (bimg == null));
-            
-            final BufferedImage bimg1 = ImageIO.read(is);
-            LOGGER.info("bimg1 null? " + (bimg1 == null));
-            
-            // if neither is null then can try displaying it in jframe.
-        } catch (IOException ex) {
-            Logger.getLogger(SaveImage.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-    }
-    public static BufferedImage  byteArrayToImage(byte[] bytes){  
-            BufferedImage bufferedImage=null;
-            try {
-                InputStream inputStream = new ByteArrayInputStream(bytes);
-                bufferedImage = ImageIO.read(inputStream);
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            }
-            return bufferedImage;
-    }
     /**
      * Checks if saved image data already exists for the same friend and user keycloak id.
      * This will help prevent duplicate data being inserted into the table
-     * @param imageInputStream InputStream
      * @return 
      */
     private boolean doesDataExist() {
@@ -266,37 +217,13 @@ public class SaveImage extends HttpServlet {
         return exists;
     }
 
-   /**
+    /**
+     * Updates friends avatar with new image.
      * 
-     * @param request HttpServletRequest
-     * @return true if the method could extract all the fields and the fields
-     * are not empty.  False otherwise.
+     * @param jsonResponse JSONObject
+     * @throws SQLException 
      */
-    private String extractDataFromPart(Part part) {
-        String content = "";
-        InputStream inStream = null;
-        try {
-            
-            inStream = part.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inStream));
-            String line = "";
-            while ((line = reader.readLine()) != null) {
-                content = line;
-                LOGGER.info(line);
-            }   
-        } catch (IOException ex) {
-            LOGGER.log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                inStream.close();
-            } catch (IOException ex) {
-                LOGGER.log(Level.SEVERE, null, ex);
-            }
-        }
-        return content;
-    }
-
-    private void updateImageToDatabase(InputStream inputStream, JSONObject jsonResponse) throws SQLException {
+    private void updateImageToDatabase(JSONObject jsonResponse) throws SQLException {
 
         Connection conn = null;
         try {
@@ -305,11 +232,6 @@ public class SaveImage extends HttpServlet {
             DataSource ds = (DataSource)ctxt.lookup("java:/comp/env/jdbc/postgres");
             conn = ds.getConnection();
             String sql = "UPDATE images SET image = ?, image_str = ? where user_keycloak_id=? and friend=?";
-            //byte[] byteArr = inputStream.readAllBytes();
-//                // test see if can display the image here
-//                BufferedImage bimg = byteArrayToImage(byteArr);
-
-
             
             PreparedStatement statement = conn.prepareStatement(sql);
             //statement.setBinaryStream(1, inputStream);
@@ -343,11 +265,11 @@ public class SaveImage extends HttpServlet {
 
 
     /**
+     * Saves the friends avatar to the database for the first time.
      * 
-     * @param inputStream
      * @throws SQLException 
      */
-    private void saveImageToDatabase(InputStream inputStream, JSONObject jsonResponse) throws SQLException {
+    private void saveImageToDatabase(JSONObject jsonResponse) throws SQLException {
 
         Connection conn = null;
         try {
@@ -356,7 +278,7 @@ public class SaveImage extends HttpServlet {
             DataSource ds = (DataSource)ctxt.lookup("java:/comp/env/jdbc/postgres");
             conn = ds.getConnection();
             String sql = "INSERT INTO images (user_keycloak_id, friend, image, image_str) Values (?,?,?,?)";
-            //String sql = "INSERT INTO images (image, userKeycloakId) Values (?, ?)";//userKeycloakId
+
             PreparedStatement statement = conn.prepareStatement(sql);
             statement.setString(1, keycloakID);
             statement.setString(2, friend);

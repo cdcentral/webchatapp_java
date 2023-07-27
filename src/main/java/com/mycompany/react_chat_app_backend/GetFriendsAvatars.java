@@ -4,24 +4,19 @@
  */
 package com.mycompany.react_chat_app_backend;
 
-import com.mycompany.react_chat_app_backend.util.Friend;
 import com.mycompany.react_chat_app_backend.util.FriendAvatars;
-import com.mycompany.react_chat_app_backend.util.FriendAvatarsV2;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -88,7 +83,7 @@ public class GetFriendsAvatars extends HttpServlet {
         extractDataFromRequest(request);
 
         // do sql commands to get list of friends and images/avatars
-        ArrayList<FriendAvatarsV2> friends = getFriendsAndAvatarsDBData();
+        ArrayList<FriendAvatars> friends = getFriendsAndAvatarsDBData();
 
         // send data back
         JSONObject jsonResponse = new JSONObject();
@@ -99,14 +94,14 @@ public class GetFriendsAvatars extends HttpServlet {
     }
 
     /**
+     * Makes SQL statements to get the users friends and their associated avatars.
      * 
      * @return 
      */
-    private ArrayList<FriendAvatarsV2> getFriendsAndAvatarsDBData() {
-        ArrayList<FriendAvatars> friends = new ArrayList<>();
+    private ArrayList<FriendAvatars> getFriendsAndAvatarsDBData() {
 
         String otherUsersEmail = "";
-        ArrayList<FriendAvatarsV2> friendsV2 = new ArrayList<>();
+        ArrayList<FriendAvatars> friendsV2 = new ArrayList<>();
         Connection conn = null;
         try {
             InitialContext ctxt = new InitialContext();
@@ -125,7 +120,7 @@ public class GetFriendsAvatars extends HttpServlet {
 
             ResultSet rows = friendsStatement.executeQuery();
             while (rows.next()) {
-                FriendAvatarsV2 friendAvatars = new FriendAvatarsV2();
+                FriendAvatars friendAvatars = new FriendAvatars();
                 friendAvatars.setFriend(rows.getString("requestee"));           // this is the users email.
                 friendAvatars.setFriendRequestId(rows.getInt("requestid"));
 
@@ -147,20 +142,10 @@ public class GetFriendsAvatars extends HttpServlet {
                             if (_friend.equals(friend2)) {
                                 friendsV2.get(i).setAvatarImage(results.getBytes("image"));
                                 friendsV2.get(i).setAvatarImageString(results.getString("image_str"));
+                                displayImageTestV3((byte[])friendsV2.get(i).getAvatarImage(), false);
                                 break;
                             }
                         }
-
-                            // Test code, this is not returned at all.
-                            FriendAvatars friend = new FriendAvatars();
-                            friend.setFriend(results.getString("friend"));
-                            //friend.setAvatarImage(results.getBinaryStream("image"));
-                            friend.setAvatarImage(results.getBytes("image"));
-                            friend.setAvatarImageString(results.getString("image_str"));
-                            displayImageTestV3((byte[])friend.getAvatarImage());
-            //                displayImageTestV2(results);
-            //                displayImageTest(friend.getAvatarImage());
-                            friends.add(friend);
                 }
             }
 
@@ -184,7 +169,7 @@ public class GetFriendsAvatars extends HttpServlet {
                                                     // THIS code here can use the keycloak id from the requestor object and get the users email.
                     otherUsersEmail = getUserEmailFromKeycloak(otherUsersKeycloakID);
 
-                    FriendAvatarsV2 friendAvatars = new FriendAvatarsV2();
+                    FriendAvatars friendAvatars = new FriendAvatars();
                     friendAvatars.setFriend(otherUsersEmail);
                     friendAvatars.setFriendRequestId(requestID);
 
@@ -209,35 +194,6 @@ public class GetFriendsAvatars extends HttpServlet {
                 }
             }
 
-            // CONSIDER PUTTING THIS SELECT code before 
-//            String sql = "SELECT * from images where user_keycloak_id = ?";
-//            PreparedStatement statement = conn.prepareStatement(sql);
-//            statement.setString(1, keycloakID);
-//
-//            ResultSet results = statement.executeQuery();
-//            while (results.next()) {
-//
-//                    String _friend = results.getString("friend");
-//                    for (int i = 0; i < friendsV2.size(); i++) {
-//                        String friend2 = friendsV2.get(i).getFriend();
-//                        if (_friend.equals(friend2)) {
-//                            friendsV2.get(i).setAvatarImage(results.getBytes("image"));
-//                            friendsV2.get(i).setAvatarImageString(results.getString("image_str"));
-//                            break;
-//                        }
-//                    }
-//
-//                        // Test code, this is not returned at all.
-//                        FriendAvatars friend = new FriendAvatars();
-//                        friend.setFriend(results.getString("friend"));
-//                        //friend.setAvatarImage(results.getBinaryStream("image"));
-//                        friend.setAvatarImage(results.getBytes("image"));
-//                        friend.setAvatarImageString(results.getString("image_str"));
-//                        displayImageTestV3((byte[])friend.getAvatarImage());
-//        //                displayImageTestV2(results);
-//        //                displayImageTest(friend.getAvatarImage());
-//                        friends.add(friend);
-//            }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, "Exception trying to see if data exists -> ", ex);
         } finally {
@@ -250,7 +206,6 @@ public class GetFriendsAvatars extends HttpServlet {
                 conn = null;
             }
         }
-        //return friends;
         return friendsV2;
     }
 
@@ -284,7 +239,7 @@ public class GetFriendsAvatars extends HttpServlet {
             URL url = new URL(keycloakUrl);
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");       
-            con.setRequestProperty("Authorization", "bearer " + this.accessTokenResponse);
+            con.setRequestProperty("Authorization", "bearer " + accessTokenResponse);
 
             int status = con.getResponseCode();
             in = new BufferedReader(
@@ -297,10 +252,10 @@ public class GetFriendsAvatars extends HttpServlet {
             JSONArray jarray = new JSONArray(content.toString());
             for(int i = 0; i < jarray.length(); i++) {
                 JSONObject jobj = jarray.getJSONObject(i);
-                String kid = String.valueOf(jobj.get("id"));
-                if (kid.equals(otherUsersKeycloakID)) {
+                String keycloakID = String.valueOf(jobj.get("id"));
+                if (keycloakID.equals(otherUsersKeycloakID)) {
                     emailToReturn = String.valueOf(jobj.get("email")); // email
-                    System.out.println("FOUND MATCHING KEYCLOAK ID");
+                    LOGGER.info("FOUND MATCHING KEYCLOAK ID");
                 }
             }
         } catch (Exception ex) {
@@ -320,7 +275,8 @@ public class GetFriendsAvatars extends HttpServlet {
      * Makes http admin rest api request to keycloak to get an access token.
      * 
      * This access token is used to make subsequent requests to keycloak.
-     * @return 
+     * 
+     * @return String value containing the access token.
      */
     private String getAccessToken() {
         StringBuffer content = new StringBuffer();
@@ -349,7 +305,7 @@ public class GetFriendsAvatars extends HttpServlet {
             while ((inputLine = in.readLine()) != null) {
                 content.append(inputLine);
             }
-            //accessTokenResponse = content.toString();
+
             System.out.println("Get Keycloak token -> " + content.toString());
         } catch (Exception ex) {
             
@@ -364,6 +320,17 @@ public class GetFriendsAvatars extends HttpServlet {
         }
         return content.toString();
     }
+
+    /**
+     * Helper method that places data that is supposed to be sent in the http post.
+     * 
+     * In this specific case it will set the post data with the keycloak endpoint 
+     * to get the access credentials.
+     * 
+     * @param params Map<String, String>
+     * @return
+     * @throws UnsupportedEncodingException 
+     */
     private  String getParamsString(Map<String, String> params) 
       throws UnsupportedEncodingException{
         StringBuilder result = new StringBuilder();
@@ -380,15 +347,19 @@ public class GetFriendsAvatars extends HttpServlet {
           ? resultString.substring(0, resultString.length() - 1)
           : resultString;
     }
+
     /**
-     * Test. Displays image read in from Postgres database.
+     * Test method.  Takes byte array of image stored in the postgres database
+     * and displays it in a JFrame window.
+     * 
+     * Dev Note: Set the second parameter to true in the calling function to see the image.
      * @param imgArr 
      */
-    private void displayImageTestV3(byte[] imgArr) {
-        String imgString = new String(imgArr, StandardCharsets.UTF_8);
-        String imgString2 = new String(imgArr, StandardCharsets.UTF_16);
-        String imgString3 = new String(imgArr, StandardCharsets.US_ASCII);
-        LOGGER.info("displayImageTestV3 -> imgString -> " + imgString);
+    private void displayImageTestV3(byte[] imgArr, boolean showImage) {
+
+        if (!showImage) {
+            return;
+        }
         try {
             final BufferedImage bufImg = ImageIO.read(new ByteArrayInputStream(imgArr));
             JFrame frame = new JFrame("Image");
@@ -403,111 +374,13 @@ public class GetFriendsAvatars extends HttpServlet {
             });
             frame.show();
         } catch (Exception ex) {
-            LOGGER.severe("[displayImageTestV3] Exception -> " + ex);
+            LOGGER.log(Level.SEVERE, "[displayImageTestV3] Exception -> {0}", ex);
         }
         
     }
+
     /**
-     * Test method to display image.
-     */
-    private void displayImageTestV2(ResultSet rows) {
-//      byte [] bdata = ((ByteArrayInputStream)data).
-//      ByteArrayInputStream bis = new ByteArrayInputStream(data);
-        try {
-            Object bytesObj = rows.getBytes("image"); // no exceptions
-            Object binaryStreamObj = rows.getBinaryStream("image"); // no exceptions
-            byte[] bArr = (byte[]) bytesObj;
-            // using binary stream
-            InputStream is = (ByteArrayInputStream)binaryStreamObj;//results.getBinaryStream("image");
-            final BufferedImage bimg1 = ImageIO.read(is); // also null
-
-            BufferedImage bimg = byteArrayToImage(bArr); // // works with this.
-
-            LOGGER.info("bimg1 null? " + (bimg1 == null) + ", bimg null? " + (bimg == null));
-//            JFrame frame = new JFrame("Image");
-//              frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//              //frame.setSize(img.getWidth(), img.getHeight());
-//              frame.setSize(200, 200);
-//              frame.add(new JPanel() {
-//                public void paint(Graphics g) {
-//                  //g.drawImage(bimg, 0, 0, null); // works with this.
-//                  g.drawImage(bimg1, 0, 0, null); // works with this also.
-//                }
-//              });
-//              frame.show();
-        } catch(Exception ex) {
-            ex.printStackTrace();
-        }
-
-//
-//        LOGGER.info("[displayImageText] data: " + data);
-//        try {
-//            InputStream is = (ByteArrayInputStream)data;//results.getBinaryStream("image");
-//            final BufferedImage bimg = ImageIO.read(is); // null
-//            final Image img = ImageIO.read(is); // null
-//            if (img == null) {
-//                return;
-//            }
-//            //img.g
-//            JFrame frame = new JFrame("Image");
-//              frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-//              //frame.setSize(img.getWidth(), img.getHeight());
-//              frame.setSize(200, 200);
-//              frame.add(new JPanel() {
-//                public void paint(Graphics g) {
-//                  g.drawImage(img, 0, 0, null);
-//                }
-//              });
-//              frame.show();
-//        //} catch (SQLException ex) {
-//          //  LOGGER.severe(ex.toString());
-//        } catch (IOException ex) {
-//            LOGGER.severe(ex.toString());
-//        }
-    }
-    public static BufferedImage  byteArrayToImage(byte[] bytes){  
-            BufferedImage bufferedImage=null;
-            try {
-                InputStream inputStream = new ByteArrayInputStream(bytes);
-                bufferedImage = ImageIO.read(inputStream);
-            } catch (IOException ex) {
-                System.out.println(ex.getMessage());
-            }
-            return bufferedImage;
-    }
-    /**
-     * Test method to display image.
-     */
-    private void displayImageTest(Object data) {
-//      byte [] bdata = ((ByteArrayInputStream)data).
-//      ByteArrayInputStream bis = new ByteArrayInputStream(data);
-
-//        LOGGER.info("[displayImageText] data: " + data);
-//        try {
-////            InputStream is = (ByteArrayInputStream)data;//results.getBinaryStream("image");
-////            final BufferedImage bimg = ImageIO.read(is); // null
-////            final Image img = ImageIO.read(is); // null
-////            if (img == null) {
-////                return;
-//            }
-////            //img.g
-////            JFrame frame = new JFrame("Image");
-////              frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-////              //frame.setSize(img.getWidth(), img.getHeight());
-////              frame.setSize(200, 200);
-////              frame.add(new JPanel() {
-////                public void paint(Graphics g) {
-////                  g.drawImage(img, 0, 0, null);
-////                }
-////              });
-////              frame.show();
-//        //} catch (SQLException ex) {
-//          //  LOGGER.severe(ex.toString());
-//        } catch (IOException ex) {
-//            LOGGER.severe(ex.toString());
-//        }
-    }
-    /**
+     * Extracts users keycloak id and email from the request.
      * 
      * @param request
      * @return 
@@ -543,7 +416,7 @@ public class GetFriendsAvatars extends HttpServlet {
         } catch (IOException ex) {
             LOGGER.log(Level.SEVERE, null, ex);
         }
-        LOGGER.info("Keycloak ID: " + keycloakID + ", Keycloak Email: " + keycloakEmail);
+        LOGGER.log(Level.INFO, "Keycloak ID: {0}, Keycloak Email: {1}", new Object[]{keycloakID, keycloakEmail});
         dataExtracted = (!keycloakID.isEmpty() && !keycloakEmail.isEmpty());
         return dataExtracted;
     }

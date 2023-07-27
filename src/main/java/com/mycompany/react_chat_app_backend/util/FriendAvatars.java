@@ -4,18 +4,17 @@
  */
 package com.mycompany.react_chat_app_backend.util;
 
-import java.io.ByteArrayInputStream;
-
 /**
  *
  * @author chris
  */
-public class FriendAvatars extends Friend {
-
+public class FriendAvatars {
 
     private Object avatarImage;
     private String avatarImageString;
-
+    private String friend;
+    private Integer friendRequestId;
+    
     public FriendAvatars() {
 
     }
@@ -30,7 +29,7 @@ public class FriendAvatars extends Friend {
      * @param avatarImage the avatarImage to set
      */
     public void setAvatarImage(Object avatarImage) {
-        System.out.println(">>>>>>> avatar Image: " + avatarImage.getClass()); // java.io.ByteArrayInputStream
+        //System.out.println(">>>>>>> avatar Image: " + avatarImage.getClass()); // java.io.ByteArrayInputStream
         this.avatarImage = avatarImage; //avatarImage	ByteArrayInputStream	#607	
     }
 
@@ -46,5 +45,33 @@ public class FriendAvatars extends Friend {
      */
     public void setAvatarImageString(String avatarImageString) {
         this.avatarImageString = avatarImageString;
+    }
+
+    /**
+     * @return the friend
+     */
+    public String getFriend() {
+        return friend;
+    }
+
+    /**
+     * @param friend the friend to set
+     */
+    public void setFriend(String friend) {
+        this.friend = friend;
+    }
+
+    /**
+     * @return the friendRequestId
+     */
+    public Integer getFriendRequestId() {
+        return friendRequestId;
+    }
+
+    /**
+     * @param friendRequestId the friendRequestId to set
+     */
+    public void setFriendRequestId(Integer friendRequestId) {
+        this.friendRequestId = friendRequestId;
     }
 }
