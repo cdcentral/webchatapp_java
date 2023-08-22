@@ -101,7 +101,7 @@ public class GetLatestMessages extends HttpServlet {
 
             String environment = (String)ctxt.lookup("java:/comp/env/appEnvironment");
 
-            String queryOrderByLimit = "select * from group_messages where chat_group_id = ? ORDER BY message_id DESC LIMIT 4";            
+            String queryOrderByLimit = "select * from group_messages where chat_group_id = ? ORDER BY message_id DESC LIMIT 10"; // LIMIT 4
 
             PreparedStatement pstmt = conn.prepareStatement(queryOrderByLimit);
             pstmt.setInt(1, chatGroupID);
