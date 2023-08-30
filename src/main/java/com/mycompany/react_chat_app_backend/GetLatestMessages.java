@@ -101,7 +101,7 @@ public class GetLatestMessages extends HttpServlet {
 
             String environment = (String)ctxt.lookup("java:/comp/env/appEnvironment");
 
-            String queryOrderByLimit = "select * from group_messages where chat_group_id = ? ORDER BY message_id DESC LIMIT 4";            
+            String queryOrderByLimit = "select * from group_messages where chat_group_id = ? ORDER BY message_id DESC LIMIT 10"; // LIMIT 4
 
             PreparedStatement pstmt = conn.prepareStatement(queryOrderByLimit);
             pstmt.setInt(1, chatGroupID);
@@ -109,7 +109,10 @@ public class GetLatestMessages extends HttpServlet {
             ResultSet rs = pstmt.executeQuery();
             while (rs.next()) {
 
-                MessageData mData = new MessageData(rs.getString("message_id"), rs.getString("message"), rs.getTimestamp("message_timestamp"), rs.getString("user_id_that_posted_msg"), rs.getString("user_name_that_posted_msg"), rs.getString("chat_group"));
+                MessageData mData = 
+                        new MessageData(rs.getString("message_id"), rs.getString("message"), rs.getTimestamp("message_timestamp"), 
+                                rs.getString("user_id_that_posted_msg"), rs.getString("user_name_that_posted_msg"), 
+                                rs.getString("user_email_that_posted_msg"), rs.getString("chat_group"));
                 dataArray.add(mData);
             }
             Collections.reverse(dataArray);

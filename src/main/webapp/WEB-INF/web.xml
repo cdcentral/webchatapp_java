@@ -60,6 +60,22 @@
         <servlet-name>RemoveFromChatGroup</servlet-name>
         <servlet-class>com.mycompany.react_chat_app_backend.RemoveFromChatGroup</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>SaveImage</servlet-name>
+        <servlet-class>com.mycompany.react_chat_app_backend.SaveImage</servlet-class>
+        <!--
+        <multipart-config>
+            <location>/tmp</location>
+            <max-file-size>         418018841</max-file-size>
+            <max-request-size>      418018841</max-request-size>
+            <file-size-threshold>   418018841</file-size-threshold>
+        </multipart-config>
+        -->
+    </servlet>
+    <servlet>
+        <servlet-name>GetFriendsAvatars</servlet-name>
+        <servlet-class>com.mycompany.react_chat_app_backend.GetFriendsAvatars</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>InviteRequest</servlet-name>
         <url-pattern>/InviteRequest</url-pattern>
@@ -95,6 +111,14 @@
     <servlet-mapping>
         <servlet-name>RemoveFromChatGroup</servlet-name>
         <url-pattern>/RemoveFromChatGroup</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>SaveImage</servlet-name>
+        <url-pattern>/SaveImage</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>GetFriendsAvatars</servlet-name>
+        <url-pattern>/GetFriendsAvatars</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>

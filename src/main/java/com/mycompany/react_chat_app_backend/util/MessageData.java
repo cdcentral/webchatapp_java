@@ -15,19 +15,58 @@ import java.sql.Timestamp;
  */
 public class MessageData {
 
+    /**
+     * Unique message id.
+     */
     private String msg_id;
+
+    /**
+     * Actual chat message content.
+     */
     private String message;
+
+    /**
+     * Timestamp of message that was posted.
+     */
     private Timestamp msg_timestamp;
+
+    /**
+     * Keycloak ID of the user who posted message.
+     */
     private String user_id;
+
+    /**
+     * Username (stored in keycloak) of the user who posted message.
+     */
     private String user_name;
+
+    /**
+     * Email (stored in keycloak) of the user who posted message.
+     */
+    private String user_email;
+
+    /**
+     * Chat group the message is posted to.
+     */
     private String chat_group;
 
-    public MessageData(String msg_id, String message, Timestamp msg_timestamp, String user_id, String user_name, String chat_group) {
+    /**
+     * 
+     * @param msg_id
+     * @param message
+     * @param msg_timestamp
+     * @param user_id
+     * @param user_name
+     * @param user_email
+     * @param chat_group 
+     */
+    public MessageData(String msg_id, String message, Timestamp msg_timestamp, String user_id, String user_name, String user_email, String chat_group) {
         this.msg_id = msg_id;
         this.message = message;
         this.msg_timestamp = msg_timestamp;
         this.user_id = user_id;
         this.user_name = user_name;
+        this.user_email = user_email;
         this.chat_group = chat_group;
     }
 
@@ -113,5 +152,19 @@ public class MessageData {
      */
     public void setChat_group(String chat_group) {
         this.chat_group = chat_group;
+    }
+
+    /**
+     * @return the user_email
+     */
+    public String getUser_email() {
+        return user_email;
+    }
+
+    /**
+     * @param user_email the user_email to set
+     */
+    public void setUser_email(String user_email) {
+        this.user_email = user_email;
     }
 }
